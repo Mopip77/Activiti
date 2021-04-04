@@ -61,7 +61,7 @@ import org.activiti.engine.runtime.Clock;
  * <pre>
  * ProcessEngine processEngine = ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration().buildProcessEngine();
  * </pre>
- *
+ * CM: 区分远端和memory的数据库，但都是h2
  * This creates a new process engine with all the defaults to connect to an memory h2 database (jdbc:h2:tcp://localhost/activiti) in standalone mode. The DB schema strategy default is in this case
  * <code>create-drop</code>. Standalone mode means that Activiti will manage the transactions on the JDBC connections that it creates. One transaction per service method.
  * </p>
@@ -157,6 +157,7 @@ public abstract class ProcessEngineConfiguration {
    * in a table named 'PRE1.ACT_RU_EXECUTION_'.
    *
    * <p />
+   * CM： 只有DB_SCHEMA_UPDATE_FALSE，并且自定义了库名，这个才有意义
    * <strong>NOTE: the prefix is not respected by automatic database schema management. If you use {@link ProcessEngineConfiguration#DB_SCHEMA_UPDATE_CREATE_DROP} or
    * {@link ProcessEngineConfiguration#DB_SCHEMA_UPDATE_TRUE}, activiti will create the database tables using the default names, regardless of the prefix configured here.</strong>
    *
@@ -200,6 +201,7 @@ public abstract class ProcessEngineConfiguration {
    * Either use Class.forName or ClassLoader.loadClass for class loading. See http://forums.activiti.org/content/reflectutilloadclass-and-custom- classloader
    */
   protected boolean useClassForNameClassLoading = true;
+  // FIXME： 这个之后具体看一下
   protected ProcessEngineLifecycleListener processEngineLifecycleListener;
 
   protected boolean enableProcessDefinitionInfoCache = false;

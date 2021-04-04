@@ -367,17 +367,21 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   protected CommandConfig defaultCommandConfig;
   protected CommandConfig schemaCommandConfig;
 
+  // CM: 命令的实际执行拦截器（在这里面会通过commandExecutor执行任务）
   protected CommandInterceptor commandInvoker;
 
   /**
+   * CM：指令拦截器，数组通过initInterceptorChain转成一个链表
    * the configurable list which will be {@link #initInterceptorChain(java.util.List) processed} to build the {@link #commandExecutor}
    */
   protected List<CommandInterceptor> customPreCommandInterceptors;
   protected List<CommandInterceptor> customPostCommandInterceptors;
 
+  // CM：这个应该不是配置项，用来存放pre，post，invoker的，顺序也是一样，post居然在invoker前面。。
   protected List<CommandInterceptor> commandInterceptors;
 
   /** this will be initialized during the configurationComplete() */
+  // CM: 命令的实际执行器
   protected CommandExecutor commandExecutor;
 
   // DATA MANAGERS /////////////////////////////////////////////////////////////
@@ -475,6 +479,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   protected List<Deployer> deployers;
   protected DeploymentManager deploymentManager;
 
+  // CM：流程定义发布的时候有缓存，避免data数据频繁查库
   protected int processDefinitionCacheLimit = -1; // By default, no limit
   protected DeploymentCache<ProcessDefinitionCacheEntry> processDefinitionCache;
 
@@ -626,6 +631,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
    *
    * (This property is only applicable when using the
    * {@link DefaultAsyncJobExecutor}).
+   * CM：每个开启了asyncExecutor的流程引擎，会生成一个UUID，作为机器名，在处理job的时候，通过写入数据库job的处理者名字加锁
    */
   protected String asyncExecutorLockOwner;
 
