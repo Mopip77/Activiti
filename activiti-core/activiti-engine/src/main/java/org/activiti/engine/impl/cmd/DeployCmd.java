@@ -57,10 +57,12 @@ public class DeployCmd<T> implements Command<Deployment>, Serializable {
     setProjectReleaseVersion(deployment);
     deployment.setVersion(1);
 
+      // CM: 是否开启了过滤重复文档的功能
     if (deploymentBuilder.isDuplicateFilterEnabled()) {
 
       List<Deployment> existingDeployments = new ArrayList<Deployment>();
-      if (deployment.getTenantId() == null || ProcessEngineConfiguration.NO_TENANT_ID.equals(deployment.getTenantId())) {
+        // CM: 根据deployment的name查找act_re_deployment表是否已有该记录
+        if (deployment.getTenantId() == null || ProcessEngineConfiguration.NO_TENANT_ID.equals(deployment.getTenantId())) {
         DeploymentEntity existingDeployment = commandContext.getDeploymentEntityManager().findLatestDeploymentByName(deployment.getName());
         if (existingDeployment != null) {
           existingDeployments.add(existingDeployment);
@@ -79,6 +81,7 @@ public class DeployCmd<T> implements Command<Deployment>, Serializable {
         existingDeployment = (DeploymentEntity) existingDeployments.get(0);
       }
 
+        // CM: 如果已部署流程和现有流程一模一样，则无需重新部署，否则版本号+1并部署
       if (existingDeployment != null) {
           if(deploymentsDiffer(deployment, existingDeployment)){
               applyUpgradeLogic(deployment, existingDeployment);
@@ -91,8 +94,10 @@ public class DeployCmd<T> implements Command<Deployment>, Serializable {
     deployment.setNew(true);
 
       // Save the data
+      // CM: 将deployment写到缓存里，后续插入db
     commandContext.getDeploymentEntityManager().insert(deployment);
 
+      // CM: 事件转发
     if (commandContext.getProcessEngineConfiguration().getEventDispatcher().isEnabled()) {
       commandContext.getProcessEngineConfiguration().getEventDispatcher().dispatchEvent(ActivitiEventBuilder.createEntityEvent(ActivitiEventType.ENTITY_CREATED, deployment));
     }
@@ -103,12 +108,15 @@ public class DeployCmd<T> implements Command<Deployment>, Serializable {
     deploymentSettings.put(DeploymentSettings.IS_PROCESS_VALIDATION_ENABLED, deploymentBuilder.isProcessValidationEnabled());
 
     // Actually deploy
+      // CM: 真正的部署流程文档
     commandContext.getProcessEngineConfiguration().getDeploymentManager().deploy(deployment, deploymentSettings);
 
+      // CM: 流程可以定时开启，这里使用定时器出发流程的启用
     if (deploymentBuilder.getProcessDefinitionsActivationDate() != null) {
       scheduleProcessDefinitionActivation(commandContext, deployment);
     }
 
+      // CM: 事件转发
     if (commandContext.getProcessEngineConfiguration().getEventDispatcher().isEnabled()) {
       commandContext.getProcessEngineConfiguration().getEventDispatcher().dispatchEvent(ActivitiEventBuilder.createEntityEvent(ActivitiEventType.ENTITY_INITIALIZED, deployment));
     }
@@ -185,6 +193,7 @@ public class DeployCmd<T> implements Command<Deployment>, Serializable {
   protected void scheduleProcessDefinitionActivation(CommandContext commandContext, DeploymentEntity deployment) {
     for (ProcessDefinitionEntity processDefinitionEntity : deployment.getDeployedArtifacts(ProcessDefinitionEntity.class)) {
 
+        // FIXME: 看看定时器怎么实现的
       // If activation date is set, we first suspend all the process
       // definition
       SuspendProcessDefinitionCmd suspendProcessDefinitionCmd = new SuspendProcessDefinitionCmd(processDefinitionEntity, false, null, deployment.getTenantId());

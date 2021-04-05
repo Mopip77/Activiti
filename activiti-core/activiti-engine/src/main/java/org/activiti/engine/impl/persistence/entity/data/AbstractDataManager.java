@@ -54,6 +54,7 @@ public abstract class AbstractDataManager<EntityImpl extends Entity> extends Abs
     return getSession(EntityCache.class);
   }
 
+    // CM: 先Cache再db
   @Override
   public EntityImpl findById(String entityId) {
     if (entityId == null) {

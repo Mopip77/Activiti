@@ -31,12 +31,17 @@ import org.springframework.core.io.Resource;
  */
 public class BeansConfigurationHelper {
 
+    // CM: 主要是实例化了processEngineConfiguration bean
   public static ProcessEngineConfiguration parseProcessEngineConfiguration(Resource springResource, String beanName) {
+      // CM: 实例化spring框架中的DefaultListableBeanFactory类
     DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
     XmlBeanDefinitionReader xmlBeanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
     xmlBeanDefinitionReader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_XSD);
+    // CM：xml资源直接交给spring解析
     xmlBeanDefinitionReader.loadBeanDefinitions(springResource);
+    // CM：通过beanFactory获取对象
     ProcessEngineConfigurationImpl processEngineConfiguration = (ProcessEngineConfigurationImpl) beanFactory.getBean(beanName);
+    // CM：将beanFactory对象通过SpringBeanFactoryProxyMap包装再保存
     processEngineConfiguration.setBeans(new SpringBeanFactoryProxyMap(beanFactory));
     return processEngineConfiguration;
   }

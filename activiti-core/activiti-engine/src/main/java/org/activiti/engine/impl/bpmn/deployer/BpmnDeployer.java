@@ -64,13 +64,15 @@ public class BpmnDeployer implements Deployer {
 
         // The ParsedDeployment represents the deployment, the process definitions, and the BPMN
         // resource, parse, and model associated with each process definition.
+        // CM: 解析BpmnParse
         ParsedDeployment parsedDeployment = parsedDeploymentBuilderFactory
-                .getBuilderForDeploymentAndSettings(deployment,
-                                                    deploymentSettings)
+                .getBuilderForDeploymentAndSettings(deployment, deploymentSettings)
                 .build();
 
+        // CM: 校验多个processDefinition没有相同的ProcessDefKey
         bpmnDeploymentHelper.verifyProcessDefinitionsDoNotShareKeys(parsedDeployment.getAllProcessDefinitions());
 
+        // CM: 给多个processDefinition赋予一些相同的deployment相关的值
         bpmnDeploymentHelper.copyDeploymentValuesToProcessDefinitions(
                 parsedDeployment.getDeployment(),
                 parsedDeployment.getAllProcessDefinitions());
@@ -80,24 +82,32 @@ public class BpmnDeployer implements Deployer {
         setProcessDefinitionDiagramNames(parsedDeployment);
 
         if (deployment.isNew()) {
+            // CM: 新的流程，需要重新部署的一系列操作
+            // CM: 根据老的流程定义版本号，加1（没有的话就是1，包括流程定义id后面的uuid也是在这生成的），设置一下流程版本号，并分发ENTITY_CREATED事件
             Map<ProcessDefinitionEntity, ProcessDefinitionEntity> mapOfNewProcessDefinitionToPreviousVersion =
                     getPreviousVersionsOfProcessDefinitions(parsedDeployment);
             setProcessDefinitionVersionsAndIds(parsedDeployment,
                                                mapOfNewProcessDefinitionToPreviousVersion);
             setProcessDefinitionAppVersion(parsedDeployment);
 
+            // CM: 保存流程定义、流程启动人信息到缓存里
             persistProcessDefinitionsAndAuthorizations(parsedDeployment);
+            // CM: 更新事件、信号管理器、timer（对流程定义而言，删掉老的流程定义，添加新的流程定义到这些事件、信号订阅者里）
             updateTimersAndEvents(parsedDeployment,
                                   mapOfNewProcessDefinitionToPreviousVersion);
+            // CM: 分发ENTITY_INITIALIZED事件
             dispatchProcessDefinitionEntityInitializedEvent(parsedDeployment);
         } else {
+            // CM: 不需要重新部署，只需要设置一些老的流程的值即可
             makeProcessDefinitionsConsistentWithPersistedVersions(parsedDeployment);
         }
 
+        // CM: 添加流程定义、bpmnModel到缓存里
         cachingAndArtifactsManager.updateCachingAndArtifacts(parsedDeployment);
 
         for (ProcessDefinitionEntity processDefinition : parsedDeployment.getAllProcessDefinitions()) {
             BpmnModel bpmnModel = parsedDeployment.getBpmnModelForProcessDefinition(processDefinition);
+            // CM: 操作节点缓存
             createLocalizationValues(processDefinition.getId(),
                                      bpmnModel.getProcessById(processDefinition.getKey()));
         }

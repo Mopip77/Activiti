@@ -47,9 +47,11 @@ public class CancelJobsCmd implements Command<Void>, Serializable {
     jobIds.add(jobId);
   }
 
+    // CM: 取消job
   public Void execute(CommandContext commandContext) {
     JobEntity jobToDelete = null;
     for (String jobId : jobIds) {
+        // CM: 在ACT_RU_JOB中找
       jobToDelete = commandContext.getJobEntityManager().findById(jobId);
 
       if (jobToDelete != null) {
@@ -58,9 +60,11 @@ public class CancelJobsCmd implements Command<Void>, Serializable {
           commandContext.getProcessEngineConfiguration().getEventDispatcher().dispatchEvent(ActivitiEventBuilder.createEntityEvent(ActivitiEventType.JOB_CANCELED, jobToDelete));
         }
 
+          // CM: 删除缓存和db的job
         commandContext.getJobEntityManager().delete(jobToDelete);
 
       } else {
+          // CM: 找不到说明可能是timer job或者job已经执行完了
         TimerJobEntity timerJobToDelete = commandContext.getTimerJobEntityManager().findById(jobId);
 
         if (timerJobToDelete != null) {

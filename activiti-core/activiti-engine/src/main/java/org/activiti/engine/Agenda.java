@@ -23,6 +23,7 @@ import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandExecutor;
 
 /**
+ * CM: 简单来说，命令不一定是按顺序执行，可以自定义执行顺序，最后循环获取getNextOperation，再去执行
  * For each API call (and thus {@link Command}) being executed, a new agenda instance is created.
  * On this agenda, operations are put, which the {@link CommandExecutor} will keep executing until
  * all are executed.

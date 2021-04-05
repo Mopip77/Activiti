@@ -20,7 +20,7 @@ import org.activiti.engine.impl.cfg.TransactionContext;
 
 /**
  * A listener that can be used to be notified of lifecycle events of the {@link CommandContext}.
- *
+ * CM: 具体的调用顺序和异常处理可以看一下CommandContext里的调用过程
 
  */
 @Internal

@@ -386,6 +386,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
 
   // DATA MANAGERS /////////////////////////////////////////////////////////////
 
+    // CM: 所有的和db相关的manager，其实就是Mapper
   protected AttachmentDataManager attachmentDataManager;
   protected ByteArrayDataManager byteArrayDataManager;
   protected CommentDataManager commentDataManager;
@@ -462,7 +463,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   // CONFIGURATORS ////////////////////////////////////////////////////////////
 
   protected boolean enableConfiguratorServiceLoader = true; // Enabled by default. In certain environments this should be set to false (eg osgi)
-  protected List<ProcessEngineConfigurator> configurators; // The injected configurators
+  protected List<ProcessEngineConfigurator> configurators; // The injected configurators CM：custom程序注入的configurators
   protected List<ProcessEngineConfigurator> allConfigurators; // Including auto-discovered configurators
 
   // DEPLOYERS //////////////////////////////////////////////////////////////////
@@ -711,10 +712,14 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
 
   // BPMN PARSER //////////////////////////////////////////////////////////////
 
+    // CM: 用户自定义的前置解析器
   protected List<BpmnParseHandler> preBpmnParseHandlers;
+    // CM: 用户自定义的后置解析前
   protected List<BpmnParseHandler> postBpmnParseHandlers;
   protected List<BpmnParseHandler> customDefaultBpmnParseHandlers;
+    // CM: 负责流程三大要素行为类的创建工作
   protected ActivityBehaviorFactory activityBehaviorFactory;
+    // CM: 负责创建任务、执行、事件监听器
   protected ListenerFactory listenerFactory;
   protected BpmnParseFactory bpmnParseFactory;
 
@@ -729,8 +734,9 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   protected VariableTypes variableTypes;
 
   /**
+   * CM：自定义可序列化的var类型
    * This flag determines whether variables of the type 'serializable' will be tracked.
-   * This means that, when true, in a JavaDelegate you can write
+   * This means that, when true, in a {@link org.activiti.engine.delegate.JavaDelegate} you can write
    *
    * MySerializableVariable myVariable = (MySerializableVariable) execution.getVariable("myVariable");
    * myVariable.setNumber(123);
@@ -763,6 +769,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   protected CommandContextFactory commandContextFactory;
   protected TransactionContextFactory transactionContextFactory;
 
+    // CM: 维护了和该配置相关的所有bean（定义在xml里的）
   protected Map<Object, Object> beans;
 
   protected DelegateInterceptor delegateInterceptor;
@@ -812,6 +819,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   /**
   *  Define a max length for storing String variable types in the database.
   *  Mainly used for the Oracle NVARCHAR2 limit of 2000 characters
+   *  CM：这个应该会影响var表的建立，但是如果已经创建过再改可能就无效了吧
   */
   protected int maxLengthStringVariableType = -1;
 
@@ -835,6 +843,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   protected ObjectMapper objectMapper = new ObjectMapper();
 
   /**
+   * CM：还是有用的，不仅仅是个用于声明的标志位
    * Flag that can be set to configure or nota relational database is used.
    * This is useful for custom implementations that do not use relational databases at all.
    *
@@ -872,6 +881,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   // /////////////////////////////////////////////////////////////////////
 
   public void init() {
+      // CM: 初始化配置器，由于原先的xml配置方式非常死板，不能通过代码的方式更改配置，这里引入了配置器，可以通过代码覆盖原有配置，需要实现ProcessEngineConfigurator接口
     initConfigurators();
     configuratorsBeforeInit();
     initHistoryLevel();
@@ -1520,6 +1530,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
 
   public void initConfigurators() {
 
+      // CM: 插入用户自定义的配置器或者serviceLoader加载的，并进行排序排序
     allConfigurators = new ArrayList<ProcessEngineConfigurator>();
 
     // Configurators that are explicitly added to the config
@@ -1624,9 +1635,12 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     }
   }
 
+  // CM: 初始化部署器
   public void initDeployers() {
+      // CM: 开关属性
     if (this.deployers == null) {
       this.deployers = new ArrayList<Deployer>();
+        // CM: 用户自定义的前置部署器
       if (customPreDeployers != null) {
         this.deployers.addAll(customPreDeployers);
       }
@@ -1636,13 +1650,18 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
       }
     }
 
+      // CM: 部署器管理器，管理了deployers
     if (deploymentManager == null) {
       deploymentManager = new DeploymentManager();
       deploymentManager.setDeployers(deployers);
 
+        // CM: 由于和部署相关，添加了很多流程定义的缓存
+        // CM: 用的是DeploymentCache缓存类型
       deploymentManager.setProcessDefinitionCache(processDefinitionCache);
+        // CM: 这个是单独的缓存类型
       deploymentManager.setProcessDefinitionInfoCache(processDefinitionInfoCache);
       deploymentManager.setKnowledgeBaseCache(knowledgeBaseCache);
+        // CM: 也绑定了configuration
       deploymentManager.setProcessEngineConfiguration(this);
       deploymentManager.setProcessDefinitionEntityManager(processDefinitionEntityManager);
       deploymentManager.setDeploymentEntityManager(deploymentEntityManager);
@@ -1654,6 +1673,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     if (parsedDeploymentBuilderFactory == null) {
       parsedDeploymentBuilderFactory = new ParsedDeploymentBuilderFactory();
     }
+      // CM: 这个类非常重要，负责创建bpmnParse，负责全局调度元素解析器和对象解析的工作
     if (parsedDeploymentBuilderFactory.getBpmnParser() == null) {
       parsedDeploymentBuilderFactory.setBpmnParser(bpmnParser);
     }

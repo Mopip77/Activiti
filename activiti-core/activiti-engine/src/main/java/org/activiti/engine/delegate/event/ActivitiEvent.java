@@ -30,6 +30,8 @@ public interface ActivitiEvent {
    */
   ActivitiEventType getType();
 
+  // CM: 如果事件不伴随execution，则下面的三个内容为null
+
   /**
    * @return the id of the execution this event is associated with. Returns null, if the event was not dispatched from within an active execution.
    */

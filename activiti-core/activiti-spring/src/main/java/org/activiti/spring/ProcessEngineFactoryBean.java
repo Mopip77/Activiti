@@ -51,10 +51,13 @@ public class ProcessEngineFactoryBean implements FactoryBean<ProcessEngine>, Dis
   }
 
   public ProcessEngine getObject() throws Exception {
+      // CM: 设置表达式管理器
     configureExpressionManager();
+    // CM: 设置事务管理器
     configureExternallyManagedTransactions();
 
     if (processEngineConfiguration.getBeans() == null) {
+        // CM: 设置bean
       processEngineConfiguration.setBeans(new SpringBeanFactoryProxyMap(applicationContext));
     }
 

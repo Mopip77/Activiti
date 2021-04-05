@@ -24,6 +24,7 @@ import org.activiti.engine.api.internal.Internal;
 @Internal
 public interface Session {
 
+    // CM: session在flush的时候会把缓存中的所有insert，update，delete语句一并刷回数据库
   void flush();
 
   void close();

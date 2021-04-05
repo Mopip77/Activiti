@@ -37,12 +37,14 @@ public class DefaultDeploymentCache<T> implements DeploymentCache<T> {
   protected Map<String, T> cache;
 
   /** Cache with no limit */
+  // CM: 完全无限制
   public DefaultDeploymentCache() {
     this.cache = synchronizedMap(new HashMap<String, T>());
   }
 
   /**
    * Cache which has a hard limit: no more elements will be cached than the limit.
+   * // CM: 如果有限制，则使用LRU，细节是limit+1，因为会先插入后删除
    */
   public DefaultDeploymentCache(final int limit) {
     this.cache = synchronizedMap(new LinkedHashMap<String, T>(limit + 1, 0.75f, true) { // +1 is needed, because the entry is inserted first, before it is removed

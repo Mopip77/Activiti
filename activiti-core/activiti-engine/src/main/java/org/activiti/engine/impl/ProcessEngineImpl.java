@@ -55,8 +55,10 @@ public class ProcessEngineImpl implements ProcessEngine {
   protected ProcessEngineConfigurationImpl processEngineConfiguration;
 
   public ProcessEngineImpl(ProcessEngineConfigurationImpl processEngineConfiguration) {
+      // CM: 流程引擎实例又绑定配置对象
     this.processEngineConfiguration = processEngineConfiguration;
     this.name = processEngineConfiguration.getProcessEngineName();
+      // CM: 所有的服务类都是通过配置对象生成的，门面模式
     this.repositoryService = processEngineConfiguration.getRepositoryService();
     this.runtimeService = processEngineConfiguration.getRuntimeService();
     this.historicDataService = processEngineConfiguration.getHistoryService();
@@ -66,6 +68,7 @@ public class ProcessEngineImpl implements ProcessEngine {
     this.asyncExecutor = processEngineConfiguration.getAsyncExecutor();
     this.commandExecutor = processEngineConfiguration.getCommandExecutor();
     this.sessionFactories = processEngineConfiguration.getSessionFactories();
+      // CM: 事务工厂上下文类
     this.transactionContextFactory = processEngineConfiguration.getTransactionContextFactory();
 
     if (processEngineConfiguration.isUsingRelationalDatabase() && processEngineConfiguration.getDatabaseSchemaUpdate() != null) {
@@ -78,20 +81,25 @@ public class ProcessEngineImpl implements ProcessEngine {
       log.info("ProcessEngine {} created", name);
     }
 
+      // CM: 注册流程引擎到ProcessEngines
     ProcessEngines.registerProcessEngine(this);
 
+      // CM: 开启job执行器
     if (asyncExecutor != null && asyncExecutor.isAutoActivate()) {
       asyncExecutor.start();
     }
 
+      // CM: 根据自己配置的DatabaseSchemaUpdate执行activiti的DDL
     if (processEngineConfiguration.getProcessEngineLifecycleListener() != null) {
       processEngineConfiguration.getProcessEngineLifecycleListener().onProcessEngineBuilt(this);
     }
 
+      // CM: 发送流程启动信号
     processEngineConfiguration.getEventDispatcher().dispatchEvent(ActivitiEventBuilder.createGlobalEvent(ActivitiEventType.ENGINE_CREATED));
   }
 
   public void close() {
+      // CM: 所有的执行流程和create完全相反，很清晰
     ProcessEngines.unregister(this);
     if (asyncExecutor != null && asyncExecutor.isActive()) {
       asyncExecutor.shutdown();

@@ -201,7 +201,6 @@ public abstract class ProcessEngineConfiguration {
    * Either use Class.forName or ClassLoader.loadClass for class loading. See http://forums.activiti.org/content/reflectutilloadclass-and-custom- classloader
    */
   protected boolean useClassForNameClassLoading = true;
-  // FIXME： 这个之后具体看一下
   protected ProcessEngineLifecycleListener processEngineLifecycleListener;
 
   protected boolean enableProcessDefinitionInfoCache = false;

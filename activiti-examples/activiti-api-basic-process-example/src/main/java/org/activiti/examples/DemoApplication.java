@@ -17,6 +17,7 @@ package org.activiti.examples;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -29,11 +30,15 @@ import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
 import org.activiti.api.process.runtime.events.listener.ProcessRuntimeEventListener;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
+import org.activiti.engine.cfg.ProcessEngineConfigurator;
+import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -138,6 +143,24 @@ public class DemoApplication implements CommandLineRunner {
         return processCompleted -> logger.info(">>> Process Completed: '"
                 + processCompleted.getEntity().getName() +
                 "' We can send a notification to the initiator: " + processCompleted.getEntity().getInitiator());
+    }
+
+    public static class AConfigurator implements ProcessEngineConfigurator {
+
+        @Override
+        public void beforeInit(ProcessEngineConfigurationImpl processEngineConfiguration) {
+            System.out.println("beforeInit");
+        }
+
+        @Override
+        public void configure(ProcessEngineConfigurationImpl processEngineConfiguration) {
+            System.out.println("configure");
+        }
+
+        @Override
+        public int getPriority() {
+            return 5000;
+        }
     }
 
     private String pickRandomString() {

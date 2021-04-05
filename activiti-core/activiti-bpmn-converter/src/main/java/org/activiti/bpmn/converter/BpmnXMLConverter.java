@@ -140,6 +140,7 @@ public class BpmnXMLConverter implements BpmnXMLConstants {
   protected SubProcessParser subProcessParser = new SubProcessParser();
 
   static {
+      // CM: 典型的开闭原则，根据xml的tag匹配不同的converter进行转换
     // events
     addConverter(new EndEventXMLConverter());
     addConverter(new StartEventXMLConverter());
@@ -194,6 +195,8 @@ public class BpmnXMLConverter implements BpmnXMLConstants {
     addConverter(converter, converter.getBpmnElementType());
   }
 
+  // CM: 如果定义了自己的converter直接在这加进来，由于是根据名字做map key，所以可以覆盖原有的converter，例如默认只有process，userTask，definition支持customAttr，
+    // 我们可以通过继承StartEventConverter来实现自定义的attr
   public static void addConverter(BaseBpmnXMLConverter converter, Class<? extends BaseElement> elementType) {
     convertersToBpmnMap.put(converter.getXMLElementName(), converter);
     convertersToXMLMap.put(elementType, converter);
@@ -310,6 +313,15 @@ public class BpmnXMLConverter implements BpmnXMLConstants {
     }
   }
 
+    /** CM: 这个方法使用了parser和convert同时处理一级tag（也包括definitions）
+     * parser用于处理非flowElement标签，converter用于处理flowElement标签
+     *
+     * converter处理，根据策略模式交付给不同的子类去处理，他们在处理标签本身的时候，最终也会处理子标签
+     * 用的又是一系列的parser去处理，但是只限于会出现在extensionElements的子tag（例如taskListener等）
+     *
+     * @param xtr
+     * @return
+     */
   public BpmnModel convertToBpmnModel(XMLStreamReader xtr) {
     BpmnModel model = new BpmnModel();
     model.setStartEventFormTypes(startEventFormTypes);

@@ -54,9 +54,12 @@ public class ParsedDeploymentBuilder {
       = new LinkedHashMap<ProcessDefinitionEntity, ResourceEntity>();
 
     for (ResourceEntity resource : deployment.getResources().values()) {
+        // CM: 必须bpmn20.xml或者bpmn结尾
       if (isBpmnResource(resource.getName())) {
         log.debug("Processing BPMN resource {}", resource.getName());
-        BpmnParse parse = createBpmnParseFromResource(resource);
+          // CM: 根据流程资源生成parse
+          BpmnParse parse = createBpmnParseFromResource(resource);
+          // CM: 可以有多个流程定义
         for (ProcessDefinitionEntity processDefinition : parse.getProcessDefinitions()) {
           processDefinitions.add(processDefinition);
           processDefinitionsToBpmnParseMap.put(processDefinition, parse);
@@ -73,6 +76,7 @@ public class ParsedDeploymentBuilder {
     String resourceName = resource.getName();
     ByteArrayInputStream inputStream = new ByteArrayInputStream(resource.getBytes());
 
+      // CM: 部分赋值
     BpmnParse bpmnParse = bpmnParser.createParse()
         .sourceInputStream(inputStream)
         .setSourceSystemId(resourceName)

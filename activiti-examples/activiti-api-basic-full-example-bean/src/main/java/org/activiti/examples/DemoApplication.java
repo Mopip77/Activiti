@@ -18,6 +18,7 @@ package org.activiti.examples;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.activiti.api.model.shared.model.VariableInstance;
@@ -31,6 +32,11 @@ import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.runtime.TaskRuntime;
+import org.activiti.bpmn.converter.BpmnXMLConverter;
+import org.activiti.bpmn.model.ExtensionAttribute;
+import org.activiti.bpmn.model.FlowElement;
+import org.activiti.engine.ProcessEngine;
+import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -52,17 +58,25 @@ public class DemoApplication implements CommandLineRunner {
 
     private final SecurityUtil securityUtil;
 
+    private final ProcessEngine processEngine;
+
     public DemoApplication(ProcessRuntime processRuntime,
                            TaskRuntime taskRuntime,
-                           SecurityUtil securityUtil) {
+                           SecurityUtil securityUtil,
+                            ProcessEngine processEngine,
+                            SpringProcessEngineConfiguration configuration) {
         this.processRuntime = processRuntime;
         this.taskRuntime = taskRuntime;
         this.securityUtil = securityUtil;
+        this.processEngine = processEngine;
+        configuration.setEnableDatabaseEventLogging(true);
+
+        processEngine.getRepositoryService().createDeployment()
+            .deploy();
     }
 
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);
-
     }
 
     @Override
@@ -71,9 +85,6 @@ public class DemoApplication implements CommandLineRunner {
 
         Page<ProcessDefinition> processDefinitionPage = processRuntime.processDefinitions(Pageable.of(0, 10));
         logger.info("> Available Process definitions: " + processDefinitionPage.getTotalItems());
-        for (ProcessDefinition pd : processDefinitionPage.getContent()) {
-            logger.info("\t > Process definition: " + pd);
-        }
 
     }
 
@@ -96,7 +107,16 @@ public class DemoApplication implements CommandLineRunner {
                 .build());
         logger.info(">>> Created Process Instance: " + processInstance);
 
-
+        logger.info("\t > Process definition: " + processInstance.getProcessDefinitionId());
+        FlowElement task = processEngine.getRepositoryService().getBpmnModel(processInstance.getProcessDefinitionId())
+            .getFlowElement("Task_1ylvdew");
+        logger.info("看看task {}", task);
+        task.getAttributes().forEach((ns, map) -> {
+            for (ExtensionAttribute extensionAttribute : map) {
+                logger.info("ns:{} name:{} value:{} prefix:{} ns:{}", ns, extensionAttribute.getName(), extensionAttribute.getValue(),
+                    extensionAttribute.getNamespacePrefix(), extensionAttribute.getNamespace());
+            }
+        });
     }
 
     @Scheduled(initialDelay = 1000, fixedDelay = 5000)

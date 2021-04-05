@@ -71,6 +71,8 @@ import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// CM: 每个CommandContext绑定一个DbSqlSession，先通过各种map，list缓存，最后在CommandContext#flushSession执行的时候一并写入db，
+//  并清空缓存
 public class DbSqlSession implements Session {
 
     private static final Logger log = LoggerFactory.getLogger(DbSqlSession.class);
@@ -182,6 +184,7 @@ public class DbSqlSession implements Session {
 
     // insert ///////////////////////////////////////////////////////////////////
 
+    // CM: 最终的插入操作是加载到了entityCache缓存里，最后才批量写入db的
     public void insert(Entity entity) {
         if (entity.getId() == null) {
             String id = dbSqlSessionFactory.getIdGenerator().getNextId();
@@ -512,6 +515,7 @@ public class DbSqlSession implements Session {
     // flush
     // ////////////////////////////////////////////////////////////////////
 
+    // CM: 实际写入数据库
     public void flush() {
         determineUpdatedObjects(); // Needs to be done before the removeUnnecessaryOperations, as removeUnnecessaryOperations will remove stuff from the cache
         removeUnnecessaryOperations();

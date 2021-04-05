@@ -57,6 +57,7 @@ public class TimerManager {
     }
   }
 
+    // CM: 部署新的timer start event并入库，也就是说ACT_RU_TIMER_JOB是只用来存放timer start event
   protected void scheduleTimers(ProcessDefinitionEntity processDefinition, Process process) {
     JobManager jobManager = Context.getCommandContext().getJobManager();
     List<TimerJobEntity> timers = getTimerDeclarations(processDefinition, process);
@@ -65,6 +66,7 @@ public class TimerManager {
     }
   }
 
+    // CM: 获取流程定义的TimerEvent StartEvent
   protected List<TimerJobEntity> getTimerDeclarations(ProcessDefinitionEntity processDefinition, Process process) {
     JobManager jobManager = Context.getCommandContext().getJobManager();
     List<TimerJobEntity> timers = new ArrayList<TimerJobEntity>();

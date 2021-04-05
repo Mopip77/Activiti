@@ -161,7 +161,9 @@ public class BpmnDeploymentHelper  {
     eventSubscriptionManager.removeObsoleteSignalEventSubScription(previousProcessDefinition);
     eventSubscriptionManager.addSignalEventSubscriptions(Context.getCommandContext(), processDefinition, process, bpmnModel);
 
+      // CM: 移除过期作业（主要是定时作业 —— timed start event）
     timerManager.removeObsoleteTimers(processDefinition);
+      // CM: 发布新的定时作业  —— timed start event
     timerManager.scheduleTimers(processDefinition, process);
   }
 

@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Specific parsing of one BPMN 2.0 XML file, created by the {@link BpmnParser}.
  *
-
+ // CM: 就是bpmn的xml解析过后的一个完全相等的java bean映射类
 
  */
 public class BpmnParse implements BpmnXMLConstants {
@@ -139,6 +139,7 @@ public class BpmnParse implements BpmnXMLConstants {
     try {
 
       ProcessEngineConfigurationImpl processEngineConfiguration = Context.getProcessEngineConfiguration();
+        // CM: 内部还是BpmnXMLConverter去解析，只是整个BpmnParse是BpmnModel的一个超集
       BpmnXMLConverter converter = new BpmnXMLConverter();
 
       boolean enableSafeBpmnXml = false;

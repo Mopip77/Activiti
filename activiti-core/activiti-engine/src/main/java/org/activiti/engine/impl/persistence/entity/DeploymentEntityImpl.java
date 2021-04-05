@@ -58,6 +58,7 @@ public class DeploymentEntityImpl extends AbstractEntityNoRevision implements De
   }
 
   public void addResource(ResourceEntity resource) {
+      // CM: resource的赋值通过repositoryService的addXXX（addZipInputStream）调用
     if (resources == null) {
       resources = new HashMap<String, ResourceEntity>();
     }
@@ -66,6 +67,7 @@ public class DeploymentEntityImpl extends AbstractEntityNoRevision implements De
 
   // lazy loading ///////////////////////////////////////////////////////////////
 
+    // CM: 直接查表ACT_GE_BYTEARRAY
   public Map<String, ResourceEntity> getResources() {
     if (resources == null && id != null) {
       List<ResourceEntity> resourcesList = Context.getCommandContext().getResourceEntityManager().findResourcesByDeploymentId(id);

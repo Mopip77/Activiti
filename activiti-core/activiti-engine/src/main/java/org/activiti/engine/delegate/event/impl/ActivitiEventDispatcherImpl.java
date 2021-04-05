@@ -34,6 +34,7 @@ import org.activiti.engine.repository.ProcessDefinition;
  */
 public class ActivitiEventDispatcherImpl implements ActivitiEventDispatcher {
 
+    // CM：某个设计模式，好像是facade，内部使用另一个类去完成实际的操作
   protected ActivitiEventSupport eventSupport;
   protected boolean enabled = true;
 
