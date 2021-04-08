@@ -59,6 +59,7 @@ public class ExecuteAsyncRunnable implements Runnable {
   public void run() {
 
     if (job == null) {
+        // CM：复用，要么传job要么传jobId
       job = processEngineConfiguration.getCommandExecutor().execute(new Command<JobEntity>() {
         @Override
         public JobEntity execute(CommandContext commandContext) {

@@ -106,6 +106,7 @@ public class DefaultAsyncJobExecutor implements AsyncExecutor {
 
   protected ProcessEngineConfigurationImpl processEngineConfiguration;
 
+    // CM：实际的执行异步任务的方法
   public boolean executeAsyncJob(final Job job) {
 
     if (isMessageQueueMode) {
@@ -116,6 +117,7 @@ public class DefaultAsyncJobExecutor implements AsyncExecutor {
 
     Runnable runnable = null;
     if (isActive) {
+        // CM：生成一个执行job的runnable，给threadpool执行
       runnable = createRunnableForJob(job);
 
       try {
@@ -157,6 +159,7 @@ public class DefaultAsyncJobExecutor implements AsyncExecutor {
   }
 
   protected Runnable createRunnableForJob(final Job job) {
+      // CM：job的实际执行方法也是可以侵入的
     if (executeAsyncRunnableFactory == null) {
       return new ExecuteAsyncRunnable(job, processEngineConfiguration);
     } else {
@@ -173,22 +176,27 @@ public class DefaultAsyncJobExecutor implements AsyncExecutor {
     log.info("Starting up the default async job executor [{}].", getClass().getName());
 
     if (timerJobRunnable == null) {
+        // CM：正常的定时任务的获取器
       timerJobRunnable = new AcquireTimerJobsRunnable(this, processEngineConfiguration.getJobManager());
     }
 
     if (resetExpiredJobsRunnable == null) {
+        // CM：超时的job？？
       resetExpiredJobsRunnable = new ResetExpiredJobsRunnable(this);
     }
 
     if (!isMessageQueueMode && asyncJobsDueRunnable == null) {
+        // CM：不启用消息队列，异步化任务的获取器
       asyncJobsDueRunnable = new AcquireAsyncJobsDueRunnable(this);
     }
 
     if (!isMessageQueueMode) {
+        // CM：初始化线程池和启动获取普通job线程
       initAsyncJobExecutionThreadPool();
       startJobAcquisitionThread();
     }
 
+      // CM：启动定时、过期job的线程
     startTimerAcquisitionThread();
     startResetExpiredJobsThread();
 

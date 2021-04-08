@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
-
+  CM: 这玩意直接继承了CommandContextCloseListener，说明在context关闭的时候会去执行一些异步的job
  */
 public class AsyncJobAddedNotification implements CommandContextCloseListener {
 

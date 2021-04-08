@@ -484,6 +484,8 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   protected int processDefinitionCacheLimit = -1; // By default, no limit
   protected DeploymentCache<ProcessDefinitionCacheEntry> processDefinitionCache;
 
+  // CM：节点缓存，（用于缓存流程中的节点，用户节点、服务节点等）
+  // CM：这玩意需要手工启用，在流程xml配置里使用localization
   protected int processDefinitionInfoCacheLimit = -1; // By default, no limit
   protected ProcessDefinitionInfoCache processDefinitionInfoCache;
 
@@ -1852,21 +1854,27 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   public void initJobHandlers() {
     jobHandlers = new HashMap<String, JobHandler>();
 
+      // CM：异步节点处理器（开启了异步化的服务任务等）
     AsyncContinuationJobHandler asyncContinuationJobHandler = new AsyncContinuationJobHandler();
     jobHandlers.put(asyncContinuationJobHandler.getType(), asyncContinuationJobHandler);
 
+      // CM：触发TimerEvent（处理边界定时事件以及中间抛出定时事件）
     TriggerTimerEventJobHandler triggerTimerEventJobHandler = new TriggerTimerEventJobHandler();
     jobHandlers.put(triggerTimerEventJobHandler.getType(), triggerTimerEventJobHandler);
 
+      // CM：定时启动开始节点
     TimerStartEventJobHandler timerStartEvent = new TimerStartEventJobHandler();
     jobHandlers.put(timerStartEvent.getType(), timerStartEvent);
 
+      // CM：定时流程定义挂起
     TimerSuspendProcessDefinitionHandler suspendProcessDefinitionHandler = new TimerSuspendProcessDefinitionHandler();
     jobHandlers.put(suspendProcessDefinitionHandler.getType(), suspendProcessDefinitionHandler);
 
+      // CM：定时流程定义启动
     TimerActivateProcessDefinitionHandler activateProcessDefinitionHandler = new TimerActivateProcessDefinitionHandler();
     jobHandlers.put(activateProcessDefinitionHandler.getType(), activateProcessDefinitionHandler);
 
+      // CM：event处理器？
     ProcessEventJobHandler processEventJobHandler = new ProcessEventJobHandler();
     jobHandlers.put(processEventJobHandler.getType(), processEventJobHandler);
 

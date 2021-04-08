@@ -74,6 +74,7 @@ public class CachingAndArtifactsManager {
     DeploymentManager deploymentManager = processEngineConfiguration.getDeploymentManager();
     ProcessDefinitionInfoEntityManager definitionInfoEntityManager = commandContext.getProcessDefinitionInfoEntityManager();
     ObjectMapper objectMapper = commandContext.getProcessEngineConfiguration().getObjectMapper();
+      // CM：根据processDefinition的id从ACT_PROCDEF_INFO里查找
     ProcessDefinitionInfoEntity definitionInfoEntity = definitionInfoEntityManager.findProcessDefinitionInfoByProcessDefinitionId(processDefinition.getId());
 
     ObjectNode infoNode = null;

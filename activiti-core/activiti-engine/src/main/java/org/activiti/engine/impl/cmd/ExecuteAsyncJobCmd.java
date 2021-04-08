@@ -49,6 +49,7 @@ public class ExecuteAsyncJobCmd implements Command<Object>, Serializable {
       throw new ActivitiIllegalArgumentException("jobId is null");
     }
 
+    // CM：job有可能被其他线程销毁
     // We need to refetch the job, as it could have been deleted by another concurrent job
     // For exampel: an embedded subprocess with a couple of async tasks and a timer on the boundary of the subprocess
     // when the timer fires, all executions and thus also the jobs inside of the embedded subprocess are destroyed.

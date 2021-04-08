@@ -55,9 +55,11 @@ public class AcquireTimerJobsRunnable implements Runnable {
 
     final CommandExecutor commandExecutor = asyncExecutor.getProcessEngineConfiguration().getCommandExecutor();
 
+    // CM: 只要没有isInterrupted不为false（只有一个地方会改，就是下面stop方法，也就是shutdown这个thread的时候）
     while (!isInterrupted) {
 
       try {
+          // CM：分页查库 -> 加乐观锁（job赋值executor（每个executor注册的id））
         final AcquiredTimerJobEntities acquiredJobs = commandExecutor.execute(new AcquireTimerJobsCmd(asyncExecutor));
 
         commandExecutor.execute(new Command<Void>() {
@@ -65,6 +67,7 @@ public class AcquireTimerJobsRunnable implements Runnable {
           @Override
           public Void execute(CommandContext commandContext) {
             for (TimerJobEntity job : acquiredJobs.getJobs()) {
+                // CM：循环消费job，并且由于TimerJobEntity并不能执行执行，需要先转换成JobEntity再去执行
               jobManager.moveTimerJobToExecutableJob(job);
             }
             return null;
@@ -72,8 +75,11 @@ public class AcquireTimerJobsRunnable implements Runnable {
         });
 
         // if all jobs were executed
+          // CM：设置job执行等待时间（默认10s）
         millisToWait = asyncExecutor.getDefaultTimerJobAcquireWaitTimeInMillis();
+        // CM：当前作业执行器需要处理的作业个数
         int jobsAcquired = acquiredJobs.size();
+        // CM：如果大于可处理job数量的阈值就不处理这一批job（为了确保这一批job都能被处理）
         if (jobsAcquired >= asyncExecutor.getMaxTimerJobsPerAcquisition()) {
           millisToWait = 0;
         }
@@ -96,6 +102,7 @@ public class AcquireTimerJobsRunnable implements Runnable {
           if (log.isDebugEnabled()) {
             log.debug("timer job acquisition thread sleeping for {} millis", millisToWait);
           }
+            // CM：线程等待
           synchronized (MONITOR) {
             if (!isInterrupted) {
               isWaiting.set(true);

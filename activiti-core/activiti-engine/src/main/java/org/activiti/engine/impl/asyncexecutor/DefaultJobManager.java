@@ -135,9 +135,12 @@ public class DefaultJobManager implements JobManager {
       throw new ActivitiException("Empty timer job can not be scheduled");
     }
 
+      // CM：转换
     JobEntity executableJob = createExecutableJobFromOtherJob(timerJob);
+      // CM：插入缓存 then db
     boolean insertSuccesful = processEngineConfiguration.getJobEntityManager().insertJobEntity(executableJob);
     if (insertSuccesful) {
+        // CM：删除TimerJob，也是先缓存再db
       processEngineConfiguration.getTimerJobEntityManager().delete(timerJob);
       triggerExecutorIfNeeded(executableJob);
       return executableJob;
@@ -304,6 +307,7 @@ public class DefaultJobManager implements JobManager {
     }
 
     if (timerEntity.getRepeat() != null) {
+        // CM：创建下次的TimerJob，并重新插入数据库
       TimerJobEntity newTimerJobEntity = timerJobEntityManager.createAndCalculateNextTimer(timerEntity, variableScope);
       if (newTimerJobEntity != null) {
         scheduleTimerJob(newTimerJobEntity);
@@ -312,6 +316,7 @@ public class DefaultJobManager implements JobManager {
   }
 
   protected void executeJobHandler(JobEntity jobEntity) {
+      // CM：交付给对应类型的jobHandler去执行
     ExecutionEntity execution = null;
     if (jobEntity.getExecutionId() != null) {
       execution = getExecutionEntityManager().findById(jobEntity.getExecutionId());
@@ -425,6 +430,7 @@ public class DefaultJobManager implements JobManager {
     AsyncJobAddedNotification jobAddedNotification = new AsyncJobAddedNotification(job, getAsyncExecutor());
     TransactionContext transactionContext = Context.getTransactionContext();
 
+    // CM：提交后才实际执行，确保TimerJob在表里已经删除了，保证多节点不重复消费job
     transactionContext.addTransactionListener(TransactionState.COMMITTED, new TransactionListener() {
         @Override
         public void execute(CommandContext commandContext) {
@@ -474,6 +480,7 @@ public class DefaultJobManager implements JobManager {
 
     if (isAsyncExecutorActive()) {
       GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        // CM：新生成的可执行任务也要上锁
       gregorianCalendar.setTime(processEngineConfiguration.getClock().getCurrentTime());
       gregorianCalendar.add(Calendar.MILLISECOND, getAsyncExecutor().getTimerLockTimeInMillis());
       executableJob.setLockExpirationTime(gregorianCalendar.getTime());

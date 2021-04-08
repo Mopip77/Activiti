@@ -58,7 +58,9 @@ public class AcquireTimerJobsCmd implements Command<AcquiredTimerJobEntities> {
 
     GregorianCalendar gregorianCalendar = new GregorianCalendar();
     gregorianCalendar.setTime(commandContext.getProcessEngineConfiguration().getClock().getCurrentTime());
+      // CM：锁5分钟
     gregorianCalendar.add(Calendar.MILLISECOND, lockTimeInMillis);
+      // CM：设置锁拥有者
     job.setLockOwner(asyncExecutor.getLockOwner());
     job.setLockExpirationTime(gregorianCalendar.getTime());
   }
