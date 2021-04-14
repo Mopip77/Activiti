@@ -26,9 +26,12 @@ import org.activiti.engine.impl.interceptor.CommandInterceptor;
 
 
  */
+    // CM：cmd实际的执行器
 public class CommandExecutorImpl implements CommandExecutor {
 
+    // CM：config是执行器级别的
   protected CommandConfig defaultConfig;
+    // CM：执行器保存了一个interceptor（任务链）实际执行就是就是从头执行cmd chain，由于interceptor是代理模式，其内部又会交付给invoker去执行
   protected CommandInterceptor first;
 
   public CommandExecutorImpl(CommandConfig defaultConfig, CommandInterceptor first) {

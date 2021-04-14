@@ -24,7 +24,8 @@ import org.slf4j.LoggerFactory;
 
 /**
 
-
+ CM: 该类负责CommandContext的初始化，但是这个又是一个CommandInterceptor放在整个CommandInnterceptor链的中段，创建CommandContext。。。
+ CM：就很神奇，居然是在CommandExecutor实际执行的过程中去创建CommandContext的。
  */
 public class CommandContextInterceptor extends AbstractCommandInterceptor {
 
@@ -42,6 +43,7 @@ public class CommandContextInterceptor extends AbstractCommandInterceptor {
   }
 
   public <T> T execute(CommandConfig config, Command<T> command) {
+      // CM：先获取栈里的上一个context，如果可重用等情况则会创建一个新的context
     CommandContext context = Context.getCommandContext();
 
     boolean contextReused = false;
@@ -56,7 +58,7 @@ public class CommandContextInterceptor extends AbstractCommandInterceptor {
     }
 
     try {
-
+        // CM：即便是reuse也会压一层栈，所以reuse仅仅是复用模板的概念
       // Push on stack
       Context.setCommandContext(context);
       Context.setProcessEngineConfiguration(processEngineConfiguration);
@@ -69,6 +71,7 @@ public class CommandContextInterceptor extends AbstractCommandInterceptor {
     } finally {
       try {
         if (!contextReused) {
+            // CM：最后执行context的关闭，例如cache -> db，所以可以看出由于context是个栈，所以数据是分批写入数据库的
           context.close();
         }
       } finally {

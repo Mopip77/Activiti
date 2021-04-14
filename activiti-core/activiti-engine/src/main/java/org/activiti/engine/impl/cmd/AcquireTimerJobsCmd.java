@@ -40,6 +40,7 @@ public class AcquireTimerJobsCmd implements Command<AcquiredTimerJobEntities> {
 
   public AcquiredTimerJobEntities execute(CommandContext commandContext) {
     AcquiredTimerJobEntities acquiredJobs = new AcquiredTimerJobEntities();
+      // CM：从数据库搜索job也是搜索的无锁job（LOCK_EXP_TIME_ = null）
     List<TimerJobEntity> timerJobs = commandContext.getTimerJobEntityManager()
         .findTimerJobsToExecute(new Page(0, asyncExecutor.getMaxAsyncJobsDuePerAcquisition()));
 

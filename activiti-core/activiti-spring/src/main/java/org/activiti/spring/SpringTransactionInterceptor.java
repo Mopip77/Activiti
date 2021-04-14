@@ -56,6 +56,7 @@ public class SpringTransactionInterceptor extends AbstractCommandInterceptor {
   }
 
   private int getPropagation(CommandConfig config) {
+      // CM：activiti事务到spring事务的转换(同时可以发现activiti只支持这三种传播类型，其他的不支持)
     switch (config.getTransactionPropagation()) {
     case NOT_SUPPORTED:
       return TransactionTemplate.PROPAGATION_NOT_SUPPORTED;

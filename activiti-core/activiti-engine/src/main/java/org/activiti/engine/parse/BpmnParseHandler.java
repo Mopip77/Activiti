@@ -25,6 +25,7 @@ import org.activiti.engine.impl.bpmn.parser.handler.AbstractBpmnParseHandler;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 
 /**
+ * CM: 由于是串联使用，可以添加自己的handler
  * Allows to hook into the parsing of one or more elements during the parsing of a BPMN 2.0 process. For more details, see the userguide section on bpmn parse handlers.
  *
  * Instances of this class can be injected into the {@link ProcessEngineConfigurationImpl}. The handler will then be called whenever a BPMN 2.0 element is parsed that matches the types returned by the

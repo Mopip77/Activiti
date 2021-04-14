@@ -744,6 +744,8 @@ public class ExecutionEntityManagerImpl extends AbstractEntityManager<ExecutionE
     lockCal.add(Calendar.MILLISECOND, lockMillis);
     Date lockDate = lockCal.getTime();
 
+      // CM：锁时间，只有原本的锁时间不存在或者早于这个锁时间才会修改锁时间，可以保证这个锁是最新的，一个乐观锁
+      // CM: 并且由于exclusiveJob保证同一个流程实例内的任务只会被一个线程顺序处理，所以这里锁的是流程实例
     executionDataManager.updateProcessInstanceLockTime(processInstanceId, lockDate, expirationTime);
   }
 

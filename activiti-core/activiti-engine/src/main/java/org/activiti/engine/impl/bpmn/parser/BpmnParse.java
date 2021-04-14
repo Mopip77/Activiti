@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Specific parsing of one BPMN 2.0 XML file, created by the {@link BpmnParser}.
  *
- // CM: 就是bpmn的xml解析过后的一个完全相等的java bean映射类
+ // CM: 就是bpmn的xml解析过后的一个完全相等的java bean映射类, 持有了bpmnModel对象，对于bpmnModel多了define等内容，所以就是整个xml
 
  */
 public class BpmnParse implements BpmnXMLConstants {
@@ -197,6 +197,7 @@ public class BpmnParse implements BpmnXMLConstants {
       // Validation successful (or no validation)
 
       // Attach logic to the processes (eg. map ActivityBehaviors to bpmn model elements)
+        // CM：将bpmnModel使用parseHandler额外解析（主要是一些额外的解析内容，以及behavior的设置）
       applyParseHandlers();
 
       // Finally, process the diagram interchange info
@@ -300,8 +301,10 @@ public class BpmnParse implements BpmnXMLConstants {
     List<BoundaryEvent> boundaryEventsToParse = new ArrayList<BoundaryEvent>();
 
     // Flow elements that depend on other elements are parse after the first run-through
+      // CM：所有元素对象信息
     List<FlowElement> defferedFlowElementsToParse = new ArrayList<FlowElement>();
 
+      // CM：遍历所有元素
     // Activities are parsed first
     for (FlowElement flowElement : flowElements) {
 

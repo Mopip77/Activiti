@@ -66,6 +66,7 @@ import org.activiti.engine.logging.LogMDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// CM：命令上下文类，该类主要在命令中进行参数的传递，不同的命令对象可以从该类里获取同意的参数，并把执行结果放在结果栈里，通过该类传递下去
 public class CommandContext {
 
     private static Logger log = LoggerFactory.getLogger(CommandContext.class);
@@ -84,8 +85,7 @@ public class CommandContext {
     protected Map<String, ExecutionEntity> involvedExecutions = new HashMap<>(1); // The executions involved with the command
     protected LinkedList<Object> resultStack = new LinkedList<>(); // needs to be a stack, as JavaDelegates can do api calls again
 
-    public CommandContext(Command<?> command,
-                          ProcessEngineConfigurationImpl processEngineConfiguration) {
+    public CommandContext(Command<?> command, ProcessEngineConfigurationImpl processEngineConfiguration) {
         this.command = command;
         this.processEngineConfiguration = processEngineConfiguration;
         this.failedJobCommandFactory = processEngineConfiguration.getFailedJobCommandFactory();

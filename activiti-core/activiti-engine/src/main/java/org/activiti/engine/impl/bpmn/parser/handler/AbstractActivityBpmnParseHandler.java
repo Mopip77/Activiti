@@ -42,16 +42,19 @@ public abstract class AbstractActivityBpmnParseHandler<T extends FlowNode> exten
   }
 
   protected void createMultiInstanceLoopCharacteristics(BpmnParse bpmnParse, Activity modelActivity) {
-
+      // CM：获取bpmnModel的mlc实体
     MultiInstanceLoopCharacteristics loopCharacteristics = modelActivity.getLoopCharacteristics();
 
+      // CM：创建mlc承载类表现
     MultiInstanceActivityBehavior miActivityBehavior = createMultiInstanceActivityBehavior(
           bpmnParse, modelActivity, loopCharacteristics);
 
+      // CM：绑定model和behavior
     modelActivity.setBehavior(miActivityBehavior);
 
     ExpressionManager expressionManager = Context.getProcessEngineConfiguration().getExpressionManager();
 
+      // CM：设置表达式对象
     // loop cardinality
     if (StringUtils.isNotEmpty(loopCharacteristics.getLoopCardinality())) {
       miActivityBehavior.setLoopCardinalityExpression(expressionManager.createExpression(loopCharacteristics.getLoopCardinality()));
@@ -71,6 +74,7 @@ public abstract class AbstractActivityBpmnParseHandler<T extends FlowNode> exten
       }
     }
 
+      // CM：设置变量
     // activiti:elementVariable
     if (StringUtils.isNotEmpty(loopCharacteristics.getElementVariable())) {
       miActivityBehavior.setCollectionElementVariable(loopCharacteristics.getElementVariable());

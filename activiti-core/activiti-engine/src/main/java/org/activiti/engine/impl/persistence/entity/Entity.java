@@ -42,6 +42,7 @@ public interface Entity {
   void setDeleted(boolean deleted);
 
   /**
+   * CM：最终在cache写回db的时候会看这个的返回值，根据这个来判断是否需要写回数据库
    * Returns a representation of the object, as would be stored in the database.
    * Used when deciding if updates have occurred to the object or not since it was last loaded.
    */

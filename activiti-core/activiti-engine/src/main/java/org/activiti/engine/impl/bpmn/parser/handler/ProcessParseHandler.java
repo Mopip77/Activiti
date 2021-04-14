@@ -53,6 +53,7 @@ public class ProcessParseHandler extends AbstractBpmnParseHandler<Process> {
   }
 
   protected ProcessDefinitionEntity transformProcess(BpmnParse bpmnParse, Process process) {
+      // CM：流程实体承载类
     ProcessDefinitionEntity currentProcessDefinition = Context.getCommandContext().getProcessDefinitionEntityManager().create();
     bpmnParse.setCurrentProcessDefinition(currentProcessDefinition);
 
@@ -69,12 +70,14 @@ public class ProcessParseHandler extends AbstractBpmnParseHandler<Process> {
       currentProcessDefinition.setEngineVersion(bpmnParse.getDeployment().getEngineVersion());
     }
 
+      // CM：创建事件监听器(这个居然是在parse这里添加到bpmnModel，而不是在xml -> bpmnModel里生成的)
     createEventListeners(bpmnParse, process.getEventListeners());
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Parsing process {}", currentProcessDefinition.getKey());
     }
 
+      // CM：处理流程下的所有flowElements
     bpmnParse.processFlowElements(process.getFlowElements());
     processArtifacts(bpmnParse, process.getArtifacts());
 

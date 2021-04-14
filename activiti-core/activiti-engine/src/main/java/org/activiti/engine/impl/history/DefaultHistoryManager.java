@@ -199,6 +199,7 @@ public class DefaultHistoryManager extends AbstractManager implements HistoryMan
 
         HistoricActivityInstanceEntity historicActivityInstanceEntity = null;
 
+          // CM：一定不从历史表里拿。。。
         // Historic activity instance could have been created (but only in cache, never persisted)
         // for example when submitting form properties
         HistoricActivityInstanceEntity historicActivityInstanceEntityFromCache =

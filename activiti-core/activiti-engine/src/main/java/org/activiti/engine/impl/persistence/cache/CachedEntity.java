@@ -59,6 +59,7 @@ public class CachedEntity {
   }
 
   public boolean hasChanged() {
+      // CM: 比较缓存前后的持久化状态，判断是否改变
     return entity.getPersistentState() != null && !entity.getPersistentState().equals(originalPersistentState);
   }
 

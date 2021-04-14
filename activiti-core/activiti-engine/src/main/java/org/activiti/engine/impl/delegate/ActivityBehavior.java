@@ -23,6 +23,11 @@ import org.activiti.engine.delegate.DelegateExecution;
 
 /**
 
+ // CM：BPMN承载类行为，
+ // BPMN6里是承载类实体（ActivityImpl），用于流程虚拟机，和bpmnModel完全一样，但是是完全独立的两个类，但是一个用于表示，一个用于运行调度
+ // BPMN7里已经没有这个区分了，只有bpmnModel
+ // 但是，具体的model的执行行为（userTask、serviceTask的实际执行）会变成一个个不同的行为，每个行为都有具体的execute方法，并且具有行为的model持有它自身的行为
+ // 例如执行到scriptTask的时候，serviceTask.getBehavior().execute()会通过类似地方法去实际执行任务，并流转流程
 
  */
 @Internal

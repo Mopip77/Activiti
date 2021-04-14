@@ -68,6 +68,7 @@ public class ExecuteAsyncRunnable implements Runnable {
       });
     }
 
+      // CM：给任务上锁
     boolean lockNotNeededOrSuccess = lockJobIfNeeded();
 
     if (lockNotNeededOrSuccess) {
@@ -127,6 +128,7 @@ public class ExecuteAsyncRunnable implements Runnable {
   protected boolean lockJobIfNeeded() {
     try {
       if (job.isExclusive()) {
+          // CM：由于默认都是独占任务，会去更新流程实例的锁时间
         processEngineConfiguration.getCommandExecutor().execute(new LockExclusiveJobCmd(job));
       }
 

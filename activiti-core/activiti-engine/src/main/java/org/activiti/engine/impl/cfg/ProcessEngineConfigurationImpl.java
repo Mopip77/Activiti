@@ -994,13 +994,16 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
 
   public Collection<? extends CommandInterceptor> getDefaultCommandInterceptors() {
     List<CommandInterceptor> interceptors = new ArrayList<CommandInterceptor>();
+      // CM：日志拦截器
     interceptors.add(new LogInterceptor());
 
+      // CM：事务拦截器，abstract，交给子类实现
     CommandInterceptor transactionInterceptor = createTransactionInterceptor();
     if (transactionInterceptor != null) {
       interceptors.add(transactionInterceptor);
     }
 
+      // CM：两个context工厂类的拦截器
     if (commandContextFactory != null) {
       interceptors.add(new CommandContextInterceptor(commandContextFactory, this));
     }
@@ -1804,6 +1807,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     bpmnParserHandlers.add(new TransactionParseHandler());
     bpmnParserHandlers.add(new UserTaskParseHandler());
 
+      // CM：可以添加自己的parseHandler
     // Replace any default handler if the user wants to replace them
     if (customDefaultBpmnParseHandlers != null) {
 
